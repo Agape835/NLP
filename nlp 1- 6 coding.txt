@@ -1,0 +1,370 @@
+1. NLP 1 Tokenization and lemmatization
+
+!pip install nltk
+
+import nltk 
+
+nltk.download('punkt')
+
+# word tokenize
+from nltk.tokenize import word_tokenize
+sentence='there are many trees in roadside'
+nltk_tokens = nltk.word_tokenize(sentence)
+nltk_tokens
+
+# senetence tokenize 
+from nltk import sent_tokenize
+sentence_token='There are so many tress in the garden'
+sent_tokenize(sentence_token)
+
+# character tokenization
+text = "WORD,SENTENCE"
+char_tokens = [char for word in nltk.word_tokenize(text) for char in word]
+char_tokens
+
+from nltk.tokenize import TreebankWordTokenizer
+text = "Natural Language Processing (NLP) is fascinating!"
+tokenizer = TreebankWordTokenizer()
+tokens = tokenizer.tokenize(text)
+tokens
+
+
+#WordPunctTokenizer
+from nltk.tokenize import WordPunctTokenizer
+tokenizer = WordPunctTokenizer()
+tokenizer.tokenize("Let's see how it's working.")
+
+lemmatization 
+
+!pip install spacy 
+nltk.download('wordnet')
+nltk.download('omw-1.4')
+
+from nltk.stem import WordNetLemmatizer
+lemmatizer = WordNetLemmatizer()
+lemmatizer.lemmatize('runs')
+lemmatizer.lemmatize('corpora')
+lemmatizer.lemmatize('happier', pos='a')
+lemmatizer.lemmatize('geese', pos='n')  
+
+# lemmitization using the sentence 
+
+def lemmatize_sentence(sentence):
+    words = word_tokenize(sentence)
+    lemmatized_sentence = [lemmatizer.lemmatize(word, get_wordnet_pos(word)) for word in words]
+    return ' '.join(lemmatized_sentence)
+
+sentence = "The striped bats are hanging on their feet for best"
+lemmatized_sentence = lemmatize_sentence(sentence)
+print(sentence) # original 
+lemmatized_sentence # lemmas..
+
+# another example of sentence for lemmatization 
+
+import spacy
+nlp = spacy.load("en_core_web_sm")
+
+text = """The quick brown foxes were jumping over the lazy dogs. 
+          It had been raining all day, so the streets were wet, 
+          and people were walking with umbrellas in their hands. 
+          Children, on the other hand, were enjoying the puddles and mud, 
+          despite the cold wind blowing across the park."""
+doc = nlp(text)
+lemmas = []
+for token in doc:
+    if not token.is_punct:
+        lemmas.append(token.lemma_)
+# Join lemmas with a space
+lemmatized_text = ' '.join(lemmas)
+print(lemmatized_text)
+
+############################################################################
+
+2. NLP II stemming and sentence segmentation 
+
+#porter stemmer
+from nltk.stem import PorterStemmer
+porter_stemmer = PorterStemmer()
+words = ["running", "jumps", "running"]
+stemmed_words = [porter_stemmer.stem(word) for word in words]
+print(words)
+print(stemmed_words)
+
+# snowbell stemmer 
+from nltk.stem import SnowballStemmer
+stemmer = SnowballStemmer("english")
+words = ["running", "jumps", "easily", "flying", "happier", "studies"]
+stemmed_words = [stemmer.stem(word) for word in words]
+for word, stemmed in zip(words, stemmed_words):
+    print(f"Original: {word} <---> Stemmed: {stemmed}")
+
+
+# Landcaster stemmer
+from nltk.stem import LancasterStemmer
+stemmer = LancasterStemmer()
+words = ["running", "jumps", "easily", "faster", "happily", "universal", "connection"]
+stemmed_words = [stemmer.stem(word) for word in words]
+for word, stemmed in zip(words, stemmed_words):
+    print(f"Original: {word} <---> Stemmed: {stemmed}")
+
+# REGULAR EXPRESSION STEMMER 
+from nltk.stem import RegexpStemmer
+custom_rule = r'ing$'
+regexp_stemmer = RegexpStemmer(custom_rule)
+word = 'running'
+stemmed_word = regexp_stemmer.stem(word)
+print(f'Original Word: {word}')
+print(f'Stemmed Word: {stemmed_word}')
+
+
+
+##sentence segmentation 
+import spacy
+
+# Load the English language model
+nlp = spacy.load('en_core_web_sm')
+
+text = "Hello! How are you? This is an example of sentence segmentation. Let's see how it works."
+
+# Process the text
+doc = nlp(text)
+
+# Extract sentences
+sentences = list(doc.sents)
+
+# Print the segmented sentences
+for i, sentence in enumerate(sentences):
+    print(f"Sentence {i + 1}: {sentence.text}")
+
+## next example 
+from nltk.tokenize import sent_tokenize 
+from nltk.corpus import Gutenberg
+import nltk
+nltk.download('gutenberg')
+sample=gutenberg.raw()
+sample
+sent=sent_tokenize(sample)
+sent
+
+## nltk sentence segmentation 
+import nltk
+nltk.download('punkt')
+
+# Example text
+text = "Hello! How are you? I hope you're doing well. Let's meet tomorrow."
+
+# Sentence segmentation
+sentences = nltk.sent_tokenize(text)
+print("NLTK Sentence Segmentation:", sentences)
+
+##spacy sentence segmentation 
+import spacy
+nlp = spacy.load("en_core_web_sm")
+
+# Example text
+text = "Hello! How are you? I hope you're doing well. Let's meet tomorrow."
+
+# Sentence segmentation
+doc = nlp(text)
+sentences = [sent.text for sent in doc.sents]
+print("SpaCy Sentence Segmentation:", sentences)
+
+############################################################################
+ 
+3. nlp using scikit library 
+
+# Import necessary libraries
+from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
+from sklearn.model_selection import train_test_split
+from sklearn.naive_bayes import MultinomialNB
+from sklearn.pipeline import Pipeline
+from sklearn.datasets import fetch_20newsgroups
+from sklearn.metrics import classification_report
+
+# Load dataset (20 Newsgroups dataset as an example)
+data = fetch_20newsgroups(subset='train', categories=['alt.atheism', 'sci.space'])
+X, y = data.data, data.target
+
+# Split data into training and testing sets
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
+
+# Create a pipeline for NLP processing and classification
+text_clf = Pipeline([
+    ('vect', CountVectorizer()),          # Convert text to word counts
+    ('tfidf', TfidfTransformer()),        # Convert word counts to TF-IDF scores
+    ('clf', MultinomialNB()),             # Classifier: Naive Bayes
+])
+
+# Train the model
+text_clf.fit(X_train, y_train)
+
+# Predict on the test set
+y_pred = text_clf.predict(X_test)
+
+# Generate classification report
+report = classification_report(y_test, y_pred, target_names=data.target_names)
+print(report)
+
+
+###########################################################################
+
+# 4 NLP USING SPACY LIBRARY
+import spacy 
+from collections import Counter
+import string
+from nltk.corpus import stopwords
+
+nlp = spacy.load('en_core_web_sm')
+text = str(input("Enter the Sentence: "))
+counter=Counter(text)
+print(counter)
+
+words = [token.text.lower() for token in doc if not token.is_punct]
+word_freq = Counter(words)
+print("\nWord Frequencies:")
+for word, count in word_freq.most_common():
+    print(f'{word}: {count}')
+
+print("\nToken Information:")
+for token in doc:
+    if not token.is_punct:
+        print(f'{token.text} --> {token.tag_} --> {token.pos_} ({spacy.explain(token.tag_)})')
+
+
+###########################################################################
+
+5. WORKING WITH TF-IDF
+
+# Import necessary libraries
+from sklearn.feature_extraction.text import TfidfVectorizer
+import pandas as pd
+
+# Define sample documents
+documents = [
+    "Machine learning is a field of artificial intelligence.",
+    "Natural language processing enables computers to understand human language.",
+    "Artificial intelligence is the simulation of human intelligence processes by machines."
+]
+
+# Create a TF-IDF vectorizer
+tfidf_vectorizer = TfidfVectorizer()
+
+# Fit and transform the documents
+tfidf_matrix = tfidf_vectorizer.fit_transform(documents)
+
+# Convert the TF-IDF matrix to a dense format and create a DataFrame
+tfidf_df = pd.DataFrame(tfidf_matrix.toarray(), columns=tfidf_vectorizer.get_feature_names_out())
+
+# Print the TF-IDF matrix
+print("TF-IDF Matrix:")
+print(tfidf_df)
+
+# Print the feature names (terms)
+print("\nFeature Names:")
+print(tfidf_vectorizer.get_feature_names_out())
+
+next example 
+
+# Importing Libraries
+from sklearn.feature_extraction.text import TfidfVectorizer
+
+# Defining Sample Documents
+documents = [
+    "The sky is blue.",
+    "The sun is bright.",
+    "The sun in the sky is bright.",
+    "We can see the shining sun, the bright sun."
+]
+
+# Creating TF-IDF Vectorizer
+tfidf_vectorizer = TfidfVectorizer()
+
+# Fitting and Transforming Documents
+tfidf_matrix = tfidf_vectorizer.fit_transform(documents)
+
+# Printing TF-IDF Matrix
+print("TF-IDF Matrix:")
+print(tfidf_matrix.toarray())
+
+# Printing Feature Names
+print("\nFeature Names (Vocabulary):")
+print(tfidf_vectorizer.get_feature_names_out())
+
+
+########################################################################
+
+6. NAÏVE BAYES CLASSIFIER
+
+# Import necessary libraries
+from sklearn.datasets import fetch_20newsgroups
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.model_selection import train_test_split
+from sklearn.naive_bayes import MultinomialNB
+from sklearn.metrics import classification_report, accuracy_score
+
+# Load dataset (20 Newsgroups dataset as an example)
+data = fetch_20newsgroups(subset='train', categories=['alt.atheism', 'sci.space'])
+X, y = data.data, data.target
+
+# Split data into training and testing sets
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
+
+# Create a TF-IDF vectorizer
+tfidf_vectorizer = TfidfVectorizer()
+
+# Fit and transform the training data
+X_train_tfidf = tfidf_vectorizer.fit_transform(X_train)
+
+# Transform the test data
+X_test_tfidf = tfidf_vectorizer.transform(X_test)
+
+# Create a Naive Bayes classifier
+nb_classifier = MultinomialNB()
+
+# Train the classifier
+nb_classifier.fit(X_train_tfidf, y_train)
+
+# Predict on the test set
+y_pred = nb_classifier.predict(X_test_tfidf)
+
+# Evaluate accuracy
+accuracy = accuracy_score(y_test, y_pred)
+print(f"Model Accuracy: {accuracy * 100:.2f}%")
+
+# Generate classification report
+report = classification_report(y_test, y_pred, target_names=data.target_names)
+print("\nClassification Report:")
+print(report)
+
+
+############################################################################
+
+# 8 python keyword extraction -- this i dont know correctly 
+# Import necessary libraries
+from rake_nltk import Rake
+
+# Sample text for keyword extraction
+text = """
+Machine learning is a field of artificial intelligence that uses algorithms and statistical models 
+to enable computers to perform tasks without explicit instructions. 
+Natural language processing is a branch of artificial intelligence that deals with the interaction 
+between computers and humans using natural language.
+"""
+
+# Initialize RAKE
+rake = Rake()
+
+# Extract keywords
+rake.extract_keywords_from_text(text)
+
+# Get the ranked phrases and their scores
+ranked_phrases_with_scores = rake.get_ranked_phrases_with_scores()
+
+# Print the extracted keywords and their scores
+print("Extracted Keywords using RAKE:")
+for score, phrase in ranked_phrases_with_scores:
+    print(f"Keyword: {phrase}, Score: {score}")
+
+
+
+
